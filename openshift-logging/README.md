@@ -1,4 +1,4 @@
-# openshift-logging
+# Application Logging on Openshift
 
 Openshift provides a preconfigured EFK(Elasticsearch, FluentD, and Kibana) stack for DevOps to aggregate all container logs. The installation of this EFK stack can be done using the ansible-playbooks included in the [openshift-ansible](https://github.com/openshift/openshift-ansible/tree/release-3.11) repository. Once the installation is completed, the EFK deployments can be found inside the *openshift-logging* namespace of the Openshift cluster.
 
