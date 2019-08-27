@@ -1,7 +1,7 @@
 # Application Monitoring on Openshift with Prometheus and Grafana
 
 ## Introduction
-When it comes to application monitoring on Openshift, the Prometheus Cluster Monitoring offered by Openshift is usually the first thing showing up on the google search result. It is an Openshift feature that can be installed by one command via Openshift Ansible playbooks just like openshift-logging. It packages both Prometheus Operator and Grafana in a single installation. It sounds like a one-click approach for all your application monitoring needs, except well, it is not! The Prometheus Cluster Monitoring is designed to monitor a selective few of predefined Openshift and Kubernetes namespaces. Redhat openly stated that modifying the Prometheus scrape targets to include namespaces outside of predefined subsets is not supported. As a result, you cannot rely on this feature for the day-to-day application monitoring needs. For application monitoring on Openshift, the user should set up their own Prometheus and Grafana deployments. This guide explores two approaches in setting up Prometheus on Openshift at the moment. The first approach is via Prometheus Operator and Service Monitor, which is arguably the most popular and future proof way of setting up Prometheus on a Kubernetes system. The second approach is the legacy way of deploying Prometheus on Openshift without the Prometheus Operator. 
+When it comes to application monitoring on Openshift, the Prometheus Cluster Monitoring offered by Openshift is usually the first thing showing up on the Google search result. It is an Openshift feature that can be installed by one command via Openshift Ansible playbooks just like openshift-logging. It packages both Prometheus Operator and Grafana in a single installation. It sounds like a one-click approach for all your application monitoring needs, except well, it is not! The Prometheus Cluster Monitoring is designed to monitor a selective few of predefined Openshift and Kubernetes namespaces. Red Hat openly stated that modifying the Prometheus scrape targets to include namespaces outside of predefined subsets is not supported. As a result, you cannot rely on this feature for the day-to-day application monitoring needs. For application monitoring on Openshift, the user should set up their own Prometheus and Grafana deployments. This guide explores two approaches in setting up Prometheus on Openshift. The first approach is via Prometheus Operator and Service Monitor, which is arguably the most popular and future proof way of setting up Prometheus on a Kubernetes system. The second approach is the legacy way of deploying Prometheus on Openshift without the Prometheus Operator. 
 
 
 ## Deploy A Sample Application with MP Metrics Endpoint
@@ -11,11 +11,11 @@ In this guide, it is assumed such app has been deployed to the Openshift cluster
 
 ## Deploy Prometheus - Prometheus Operator
 
-The Prometheus Operator is an open-source project from CoreOS as part of their Kubernetes Operator offering, which was later acquired by Red Hat. It is starting to become the standard for Prometheus deployments on Kubernetes system. When Prometheus Operator is installed on the Kubernetes system, users no longer need to deal with Prometheus configuration by hands. Instead, they should create ServiceMonitors resource for each of the service endpoint that needs to be monitored, which makes maintaining the Prometheus stack a lot easier in daily operation. An overview architecture of the Prometheus is shown below:
+The Prometheus Operator is an open-source project from CoreOS as part of their Kubernetes Operator offering. It is starting to become the standard for Prometheus deployments on Kubernetes system. When Prometheus Operator is installed on the Kubernetes system, users no longer need to deal with Prometheus configuration by hands. Instead, they need to create ServiceMonitor resources for each of the service endpoint that needs to be monitored, which makes maintaining the Prometheus server a lot easier in daily operation. An architecture overview of the Prometheus Operator is shown below:
 
 ![Prometheus Operator](https://coreos.com/sites/default/files/inline-images/p1.png "Prometheus Operator Architecture")
 
-There are two ways to install Prometheus Operator. One is through Openshift Operator Lifecycle Manager, which is still in its technology preview phase in release 3.11. This approach will install an older version of Prometheus Operator but is supported by Openshift and Redhat. Another approach is to install Prometheus Operator by following the guide from the project's git repository at [here](https://github.com/coreos/prometheus-operator). Since OLM is still at its tech preview stage and requires a Red Hat subscription account for installation, this guide will show the installation without OLM to target a larger audience base. The guide will be updated when Kabanero officially adopts Openshift 4.x a few months from now.
+There are two ways to install Prometheus Operator. One is through Openshift Operator Lifecycle Manager or OLM, which is still in its technology preview phase in release 3.11 of Openshift. This approach will install an older version of Prometheus Operator that is supported by Red Hat. Another approach is to install Prometheus Operator by following the guide from the Prometheus Operator's git repository at [here](https://github.com/coreos/prometheus-operator). Since OLM is still at its tech preview stage and requires a Red Hat subscription account for installation, this guide will show the installation without OLM to target a larger audience base. The guide will be updated with OLM approach when Kabanero officially adopts Openshift 4.x a few months from now.
 
 ### Prometheus Operator Installation without OLM
 
@@ -28,7 +28,7 @@ Clone the repository
 [root@rhel7-openshift ~]# git clone https://github.com/coreos/prometheus-operator
 ```
 
-Open the bundle.yaml file and change all instances **namespace: default** to the namespace where you want to deploy the prometheus operator. In this example, we will use **namespace: prometheus-operator**.
+Open the bundle.yaml file and change all instances of **namespace: default** to the namespace where you want to deploy the prometheus operator. In this example, let's use **namespace: prometheus-operator**. You might need to create a new namespace called **prometheus-operator** if not present on your Openshift cluster.
 
 Save the file and deploy the prometheus-operator using the following command.
 ```
@@ -40,13 +40,13 @@ You might encounter an error message like the one below when running the command
 Error creating: pods "prometheus-operator-5b8bfd696-" is forbidden: unable to validate against any security context constraint: [spec.containers[0].securityContext.securityContext.runAsUser: Invalid value: 65534: must be in the ranges: [1000070000, 1000079999]]
 ```
 
-Simply change **runAsUser: 65534** field to a value that is in the range from the error message. In this case, let's just set **runAsUser: 1000070000**. Save the bundle file and redeploy promtheus-operator.
+Simply change **runAsUser: 65534** field to a value that is in the range specified in the error message. In this case, let's just set **runAsUser: 1000070000**. Save the bundle file and redeploy promtheus-operator.
 ```
 [root@rhel7-openshift ~]# oc delete -f bundle.yaml
 [root@rhel7-openshift ~]# oc apply -f bundle.yaml
 ```
 
-Create a file called **service_monitor.yaml**  that defines a ServiceMounitor resource. A ServiceMonitor defines a service endpoint that should be monitored by the Prometheus instance. In this example, the application with label **app: myapp** from namespace **myapp**, and metrics endpoints defined in **spec.endpoints** is to be monitored.
+Create a file called **service_monitor.yaml**  that defines a ServiceMounitor resource. A ServiceMonitor defines a service endpoint that needs to be monitored by the Prometheus instance. In this example, the application with label **app: myapp** from namespace **myapp**, and metrics endpoints defined in **spec.endpoints** will be monitored by Promtheus.
 ```
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -74,7 +74,7 @@ Apply the servicemonitor.yaml file to create the ServiceMonitor resource.
 [root@rhel7-openshift ~]# oc apply -f service_monitor.yaml
 ```
 
-Next, define a Prometheus resource that will scrape the targets defined in the ServiceMonitor resource. 
+Next, define a Prometheus resource that can scrape the targets defined in the ServiceMonitor resource. 
 Create a prometheus.yaml file that aggregates all the files from git repository directory prometheus-operator/example/rbac/prometheus/. Make sure to change the **namespace: default** to **namespace: prometheus-operator** .
 ```
 apiVersion: v1
@@ -174,7 +174,7 @@ NAME         HOST/PORT                                                 PATH     
 prometheus   prometheus-prometheus-operator.apps.9.37.135.153.nip.io             prometheus   web                     None
 ```
 
-Visit the **prometheus** route and go to the Prometheus **targets** page. At this point, the page should be empty with no endpoints being discovered. There is no need to worry as that's expected at this point. There is one more step to get the targets showing up. Going back to visit prometheus.yaml file again and pay attention to both **serviceMonitorNamespaceSelector** and **serviceMonitorSelector** fields in the yaml file. The ServiceMonitor needs to satisfy the matching requirement for both selectors before it can be picked up by the Prometheus service. In this case, our service monitor has the *k8s-app* label, but the target namespace "myapp" is missing the required *prometheus: monitoring* label.
+Visit the **prometheus** route and go to the Prometheus **targets** page. At this point, the page should be empty with no endpoints being discovered. There is no need to worry as that's expected. There is one more step to get the targets showing up. Going back to the prometheus.yaml file again and pay attention to both **serviceMonitorNamespaceSelector** and **serviceMonitorSelector** fields in the yaml file. The ServiceMonitor needs to satisfy the matching requirement for both selectors before it can be picked up by the Prometheus service. In this case, our ServiceMonitor has the **k8s-app** label, but the target namespace "myapp" is missing the required **prometheus: monitoring** label.
 ```
   serviceMonitorNamespaceSelector:
     matchLabels:
@@ -198,7 +198,7 @@ oc adm pod-network make-projects-global prometheus-operator
 
 ## Legacy Prometheus deployments
 
-For users who just migrated their applications to Openshift and are used to handcrafting their own Prometheus configuration file, Prometheus Operator is not the only option for Prometheus deployments. it is still possible to deploy Prometheus the old fashioned way without too much headache thanks to the eaxmple yaml file provided by Openshift
+For users who just migrated their applications to Openshift and are used to handcrafting their own Prometheus configuration file, Prometheus Operator is not the only option for Prometheus deployments. it is still possible to deploy Prometheus the old fashioned way without too much headache thanks to the eaxmple yaml file provided by Openshift.
 ```
 [root@rhel7-openshift ~]# oc new-project Prometheus
 ```
@@ -266,7 +266,7 @@ Make sure the monitored application's pods are started with the following annota
     prometheus.io/scrape: 'true'
 ```
 
-Verify the scrape target is up and available in Prometheus by visiting Promethues **Console -> Status -> Targets**.
+Verify the scrape target is up and available in Prometheus by visiting Prometheus's web console **Console -> Status -> Targets**.
 
 If the service endpoint is discovered, but Prometheus is reporting a *DOWN* status, you need to make prometheus project to be globally accessible.
 ```
