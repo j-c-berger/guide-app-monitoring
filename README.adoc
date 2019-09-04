@@ -1,3 +1,6 @@
+---
+permalink: app-monitoring
+---
 :projectid: app-monitoring
 :page-layout: guide-multipane
 :page-duration: 60 minutes
