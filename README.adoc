@@ -25,7 +25,7 @@ In this guide, it is assumed such app has been deployed to the OpenShift cluster
 
 The Prometheus Operator is an open-source project from CoreOS as part of their Kubernetes Operator offering. It is starting to become the standard for Prometheus deployments on Kubernetes system. When Prometheus Operator is installed on the Kubernetes system, users no longer need to deal with Prometheus configuration by hands. Instead, they need to create ServiceMonitor resources for each of the service endpoint that needs to be monitored, which makes maintaining the Prometheus server a lot easier in daily operation. An architecture overview of the Prometheus Operator is shown below:
 
-https://coreos.com/sites/default/files/inline-images/p1.png[Prometheus Operator]
+image::/img/guide/prometheusOperator.png[link="/img/guide/prometheusOperator.png" alt="Prometheus Operator"]
 
 There are two ways to install Prometheus Operator. One is through Openshift Operator Lifecycle Manager or OLM, which is still in its technology preview phase in release 3.11 of Openshift. This approach will install an older version of Prometheus Operator that is supported by Red Hat. Another approach is to install Prometheus Operator by following the guide from the https://github.com/coreos/prometheus-operator[Prometheus Operator git repository]. Since OLM is still at its tech preview stage and requires a Red Hat subscription account for installation, this guide will show the installation without OLM to target a larger audience base. The guide will be updated with OLM approach when Kabanero officially adopts Openshift 4.x a few months from now.
 
@@ -264,12 +264,12 @@ The *\[grafana-ocp token\]* can be acquired by the following command.
   
 Add the config map to the application grafana and mount to `/usr/share/grafana/datasources`.
 
-image::/img/guide/configMap.png[ConfigMap mount path UI]
+image::/img/guide/configMap.png[link="/img/guide/configMap.png" alt="ConfigMap mount path UI"]
 
 
 Save and test the data source. You should see 'Datasource is working'.
 
-image::/img/guide/grafana.png[Grafana data source UI]
+image::/img/guide/grafana.png[link="/img/guide/grafana.png" alt="Grafana data source UI"]
 
 
 Good job! it is now possible to consume all the application metrics gathered by Prometheus on Grafana dashboard.
