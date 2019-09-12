@@ -22,13 +22,14 @@ For application monitoring on OpenShift, you need to set up your own Prometheus 
 	A. The first approach is via Prometheus Operator and Service Monitor, which is the newest and the most popular way of setting up Prometheus on a Kubernetes system. 
 	B. Use the legacy way of deploying Prometheus on OpenShift without the Prometheus Operator. 
 
+This guide explores both approaches to set up Prometheus on openshift. 
 
-== A: Deploy A Sample Application with MP Metrics Endpoint
+=== Deploy A Sample Application with MP Metrics Endpoint
 Prior to deploying Prometheus, ensure that there is a running application that has a service endpoint for outputting metrics in Prometheus format. 
 
 It is assumed such a running application has been deployed to the OpenShift cluster inside a project/namespace called `myapp`, and that the Prometheus metrics endpoint is exposed on path `/metrics`.
 
-== Deploy Prometheus - Prometheus Operator
+== A: Deploy Prometheus - Prometheus Operator
 
 The Prometheus Operator is an open-source project originating from CoreOS and exists as as part of their Kubernetes Operator offering. The Kubernetes Operator framework is becoming the standard for Prometheus deployments on a Kubernetes system. When the Prometheus Operator is installed on the Kubernetes system, you no longer need to hand-configure the Prometheus configuration. Instead, you create ServiceMonitor resources for each of the service endpoints that needs to be monitored: this makes daily maintainenance of the Prometheus server a lot easier. An architecture overview of the Prometheus Operator is shown below:
 
